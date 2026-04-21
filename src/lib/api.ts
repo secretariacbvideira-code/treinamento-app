@@ -3,7 +3,7 @@
 // 1. Tornar a planilha pública na web (Arquivo > Publicar na web > JSON)
 // 2. Copiar o link de publicação aqui
 
-const SHEET_JSON_URL = 'SUA_URL_DA_PUBLISH_API';
+const SHEET_JSON_URL = '1HwJvFV3QLJxc9RKsoUJuQ7hzGgqRi-7230ZvraHmHYg';
 
 const isOnlineMode = true;
 
