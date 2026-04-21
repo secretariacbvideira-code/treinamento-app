@@ -25,7 +25,7 @@ export default function Home() {
     checkConnection();
   }, []);
 
-  const checkConnection = async () => {
+const checkConnection = async () => {
     if (isOnlineMode) {
       try {
         const result = await api.getSettings();
@@ -80,7 +80,15 @@ export default function Home() {
             sessionStorage.setItem('user', JSON.stringify(result.user));
             router.push('/dashboard');
           } else {
-            setError(result.error || 'Erro ao fazer login');
+            // Tentar local
+            const savedUsers = JSON.parse(localStorage.getItem('treinamento-users') || '[]');
+            const foundUser = savedUsers.find((u: any) => u.email === email && u.senha === password);
+            if (foundUser) {
+              sessionStorage.setItem('user', JSON.stringify(foundUser));
+              router.push('/dashboard');
+            } else {
+              setError(result.error || 'Email ou senha inválidos');
+            }
           }
         } else {
           const result = await api.register(name, email, password);
@@ -96,12 +104,12 @@ export default function Home() {
         const savedUsers = JSON.parse(localStorage.getItem('treinamento-users') || '[]');
         
         if (isLogin) {
-          const foundUser = savedUsers.find((u: any) => u.email === email);
+          const foundUser = savedUsers.find((u: any) => u.email === email && u.senha === password);
           if (foundUser) {
             offlineStore.setUser(foundUser);
             router.push('/dashboard');
           } else {
-            setError('Usuário não encontrado. Cadastre-se primeiro.');
+            setError('Email ou senha inválidos');
           }
         } else {
           if (savedUsers.find((u: any) => u.email === email)) {
@@ -109,7 +117,7 @@ export default function Home() {
             setLoading(false);
             return;
           }
-          const newUser = { id: Date.now().toString(), name, email };
+          const newUser = { id: Date.now().toString(), name, email, senha: password };
           savedUsers.push(newUser);
           localStorage.setItem('treinamento-users', JSON.stringify(savedUsers));
           offlineStore.setUser(newUser);
@@ -117,7 +125,28 @@ export default function Home() {
         }
       }
     } catch (err) {
-      setError('Erro de conexão. Tente novamente.');
+      // Erro - usar modo offline
+      const savedUsers = JSON.parse(localStorage.getItem('treinamento-users') || '[]');
+      
+      if (isLogin) {
+        const foundUser = savedUsers.find((u: any) => u.email === email && u.senha === password);
+        if (foundUser) {
+          sessionStorage.setItem('user', JSON.stringify(foundUser));
+          router.push('/dashboard');
+        } else {
+          setError('Email ou senha inválidos');
+        }
+      } else {
+        if (savedUsers.find((u: any) => u.email === email)) {
+          setError('Email já cadastrado');
+        } else {
+          const newUser = { id: Date.now().toString(), name, email, senha: password };
+          savedUsers.push(newUser);
+          localStorage.setItem('treinamento-users', JSON.stringify(savedUsers));
+          sessionStorage.setItem('user', JSON.stringify(newUser));
+          router.push('/dashboard');
+        }
+      }
     }
     
     setLoading(false);
