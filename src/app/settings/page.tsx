@@ -3,21 +3,27 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
-import { ArrowLeft, Save, Image, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, settings, updateSettings } = useAppStore();
+  const { user, settings, updateSettings, setUser } = useAppStore();
 
   const [appName, setAppName] = useState(settings.appName);
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/');
-    }
-  }, [user, router]);
+    const checkAuth = () => {
+      const sessionUser = sessionStorage.getItem('user');
+      if (sessionUser && !user) {
+        setUser(JSON.parse(sessionUser));
+      } else if (!sessionUser && !user) {
+        router.push('/');
+      }
+    };
+    checkAuth();
+  }, [user, router, setUser]);
 
   const handleSave = () => {
     updateSettings({ appName, logoUrl });

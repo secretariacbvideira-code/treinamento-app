@@ -19,12 +19,19 @@ export default function LessonPage() {
   const [activeTab, setActiveTab] = useState<'content' | 'quiz'>('content');
 
   const lesson = lessons.find((l) => l.id === lessonId);
+  const { setUser } = useAppStore();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/');
-    }
-  }, [user, router]);
+    const checkAuth = () => {
+      const sessionUser = sessionStorage.getItem('user');
+      if (sessionUser && !user) {
+        setUser(JSON.parse(sessionUser));
+      } else if (!sessionUser && !user) {
+        router.push('/');
+      }
+    };
+    checkAuth();
+  }, [user, router, setUser]);
 
   if (!lesson) {
     return (

@@ -42,6 +42,13 @@ export default function Home() {
   const user = isOnlineMode ? null : offlineStore.user;
   const settings = offlineStore.settings;
 
+  useEffect(() => {
+    const sessionUser = sessionStorage.getItem('user');
+    if (sessionUser) {
+      router.push('/dashboard');
+    }
+  }, [router]);
+
   if (user && !isOnlineMode) {
     router.push('/dashboard');
     return null;
